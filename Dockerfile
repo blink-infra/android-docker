@@ -26,11 +26,13 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-8-jdk libc6:i386 l
 # ------------------------------------------------------
 # --- Download Android SDK tools into $ANDROID_HOME
 RUN cd /opt \
-    && wget -q https://dl.google.com/android/repository/tools_r25.2.5-linux.zip -O android-sdk-tools.zip \
-    && unzip -q android-sdk-tools.zip -d ${ANDROID_HOME} \
+    && mkdir ${ANDROID_HOME} \
+    && mkdir ${ANDROID_HOME}/cmdline-tools \
+    && wget -q https://dl.google.com/android/repository/commandlinetools-linux-6609375_latest.zip -O android-sdk-tools.zip \
+    && unzip -q android-sdk-tools.zip -d ${ANDROID_HOME}/cmdline-tools \
     && rm -f android-sdk-tools.zip
 
-ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
+ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/cmdline-tools/tools/bin:${ANDROID_HOME}/platform-tools
 
 # ------------------------------------------------------
 # --- Install Android SDKs and other build packages
@@ -44,13 +46,19 @@ ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}
 # License is valid for all the standard components in versions installed from this file
 # Non-standard components: MIPS system images, preview versions, GDK (Google Glass) and Android Google TV require separate licenses, not accepted there
 RUN mkdir -p ${ANDROID_HOME}/licenses
-RUN echo 8933bad161af4178b1185d1a37fbf41ea5269c55 > ${ANDROID_HOME}/licenses/android-sdk-license
+RUN echo 24333f8a63b6825ea9c5514f83c2829b004d1fee > ${ANDROID_HOME}/licenses/android-sdk-license
+RUN echo 84831b9409646a918e30573bab4c9c91346d8abd > ${ANDROID_HOME}/licenses/android-sdk-preview-license
+
+# list
+RUN sdkmanager --list
 
 # Platform tools
 RUN sdkmanager "platform-tools"
 
 # SDKs
 # Please keep these in descending order!
+RUN sdkmanager "platforms;android-30"
+RUN sdkmanager "platforms;android-29"
 RUN sdkmanager "platforms;android-26"
 RUN sdkmanager "platforms;android-25"
 RUN sdkmanager "platforms;android-24"
@@ -62,6 +70,8 @@ RUN sdkmanager "platforms;android-19"
 
 # build tools
 # Please keep these in descending order!
+RUN sdkmanager "build-tools;30.0.2"
+RUN sdkmanager "build-tools;29.0.2"
 RUN sdkmanager "build-tools;26.0.0"
 # RUN sdkmanager "build-tools;25.0.3"
 # RUN sdkmanager "build-tools;25.0.2"
